@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { Space_Grotesk } from "next/font/google";
 import ThemeProvider from "@/components/dashboard/ThemeProvider";
 import ConditionalDashboardLayout from "@/components/dashboard/ConditionalDashboardLayout";
+import ToastProviderWrapper from "@/components/providers/ToastProviderWrapper";
 
-const geistSans = Geist({
+const spaceGrotesk = Space_Grotesk({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -25,14 +20,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={spaceGrotesk.variable}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
       >
         <ThemeProvider>
-          <ConditionalDashboardLayout>
-            {children}
-          </ConditionalDashboardLayout>
+          <ToastProviderWrapper>
+            <ConditionalDashboardLayout>
+              {children}
+            </ConditionalDashboardLayout>
+          </ToastProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

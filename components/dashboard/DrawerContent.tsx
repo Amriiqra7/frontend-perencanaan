@@ -29,7 +29,10 @@ interface MenuItemProps {
 }
 
 function MenuItem({ menu, open, pathname, onNavigate }: MenuItemProps): React.ReactElement {
-  const isActive = pathname === menu.link;
+  const isActive = 
+    pathname === menu.link || 
+    (menu.link !== '/' && pathname.startsWith(menu.link + '/')) ||
+    (menu.link !== '/' && pathname === menu.link);
 
   return (
     <ListItem disablePadding sx={{ display: 'block' }}>
@@ -43,9 +46,13 @@ function MenuItem({ menu, open, pathname, onNavigate }: MenuItemProps): React.Re
           '&.Mui-selected': {
             backgroundColor: '#FFF3E0',
             color: '#FF8C00',
+            borderLeft: '3px solid #FF8C00',
             '&:hover': {
               backgroundColor: '#FFE0B2',
             },
+          },
+          '&:hover': {
+            backgroundColor: isActive ? '#FFE0B2' : 'action.hover',
           },
         }}
       >
@@ -68,6 +75,7 @@ function MenuItem({ menu, open, pathname, onNavigate }: MenuItemProps): React.Re
           primaryTypographyProps={{
             fontSize: '0.875rem',
             fontWeight: isActive ? 600 : 400,
+            color: isActive ? '#FF8C00' : 'inherit',
           }}
           sx={{ opacity: open ? 1 : 0 }}
         />
@@ -88,10 +96,10 @@ function MenuGroupItem({ group, open, pathname, onNavigate }: MenuGroupItemProps
     return null;
   }
 
-  const groupKey = group.group_name || group.group_link || `group-${Math.random()}`;
+  const groupKey = group.group_name || group.group_link || (group.menus[0]?.menu_id ? `group-${group.menus[0].menu_id}` : 'unknown-group');
 
   return (
-    <React.Fragment key={groupKey}>
+    <React.Fragment>
       {open && group.group_name && (
         <Box sx={{ px: 2, py: 1 }}>
           <Typography
@@ -133,6 +141,26 @@ export default function DrawerContent({ menuData, open }: DrawerContentProps): R
     }
   };
 
+  const staticMenuItems = useMemo(() => {
+    const staticMenu: MenuDetail = {
+      menu_id: 9999,
+      menu_name: 'Menu RAB',
+      icon: 'document',
+      link: '/menu-rab',
+      group_name: 'Static Menu',
+    };
+
+    return (
+      <MenuItem
+        key="static-menu-rab"
+        menu={staticMenu}
+        open={open}
+        pathname={pathname}
+        onNavigate={handleNavigate}
+      />
+    );
+  }, [open, pathname, handleNavigate]);
+
   const menuItems = useMemo(() => {
     return menuData.map((group, index) => {
       const groupKey = group.group_name || group.group_link || `group-${index}`;
@@ -150,7 +178,11 @@ export default function DrawerContent({ menuData, open }: DrawerContentProps): R
 
   return (
     <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-      <List>{menuItems}</List>
+      <List>
+        {staticMenuItems}
+        <Divider sx={{ my: 1 }} />
+        {menuItems}
+      </List>
     </Box>
   );
 }

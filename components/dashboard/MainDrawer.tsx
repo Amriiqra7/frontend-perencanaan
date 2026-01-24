@@ -67,7 +67,6 @@ export default function MainDrawer({ window, drawerOpen, onDrawerToggle }: MainD
               width: DRAWER_WIDTH,
               borderRight: `1px solid ${theme.palette.divider}`,
               backgroundImage: 'none',
-              boxShadow: theme.shadows[16],
               zIndex: 1300,
             },
             '& .MuiBackdrop-root': {

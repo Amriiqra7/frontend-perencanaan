@@ -124,18 +124,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
           }}
         >
           <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2 }}
-            >
-              <Menu size={24} />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-              Dashboard
-            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               {user && (
                 <Tooltip title={typeof user.name === 'string' ? user.name : 'User'}>
@@ -146,7 +135,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                       '&:hover': {
                         backgroundColor: 'action.hover',
                       },
-                      ml: 0.5,
                     }}
                   >
                     <Avatar sx={{ width: 32, height: 32, bgcolor: '#FF8C00', color: '#ffffff' }}>
@@ -165,9 +153,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                       localStorage.removeItem('user');
                       localStorage.removeItem('settings_p');
                       localStorage.removeItem('drawerOpen');
-                      
+
                       removeBackendToken();
-                      
+
                       const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
                       if (portalUrl) {
                         window.location.href = portalUrl;
@@ -181,7 +169,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                       backgroundColor: 'error.light',
                       color: 'error.main',
                     },
-                    ml: 0.5,
                   }}
                 >
                   <Logout size={22} />
@@ -190,8 +177,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
             </Box>
           </Toolbar>
         </AppBar>
-        <Toolbar />
-        <Box sx={{ mt: 2 }}>{children}</Box>
+        <Toolbar sx={{ minHeight: '48px !important' }} />
+        <Box>{children}</Box>
       </Box>
     </Box>
   );

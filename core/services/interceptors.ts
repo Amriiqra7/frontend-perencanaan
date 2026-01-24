@@ -2,6 +2,12 @@ import type { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConf
 import type { InterceptorConfig, InterceptorOptions, HandleRequestFunction } from '@/types/core';
 import { getBackendToken, removeBackendToken } from '@/lib/session';
 
+let globalShowToast: ((message: string, severity?: 'error' | 'warning' | 'info' | 'success') => void) | null = null;
+
+export function setGlobalToast(showToast: (message: string, severity?: 'error' | 'warning' | 'info' | 'success') => void): void {
+  globalShowToast = showToast;
+}
+
 const INTERCEPTOR_CONFIG: InterceptorConfig = {
   TOAST_COOLDOWN: 2000,
   MAX_RETRY_ATTEMPTS: 0,
@@ -79,6 +85,50 @@ export function setupInterceptorsTo(
       if (error.response?.status === 401 && typeof window !== 'undefined') {
         removeBackendToken();
       }
+
+      if (!config.disableErrorToast && typeof window !== 'undefined') {
+        let errorMessage = 'Terjadi kesalahan pada server';
+        
+        if (error.response?.data) {
+          const data = error.response.data as Record<string, unknown>;
+          errorMessage = 
+            (data.message as string) || 
+            (data.error as string) || 
+            (typeof data === 'string' ? data : errorMessage);
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        if (globalShowToast) {
+          try {
+            globalShowToast(errorMessage, 'error');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[Interceptor] Toast shown:', errorMessage);
+            }
+          } catch (err) {
+            console.error('[Interceptor] Error showing toast:', err);
+          }
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[Interceptor] Toast not registered yet, will retry:', errorMessage);
+          }
+          setTimeout(() => {
+            if (globalShowToast) {
+              try {
+                globalShowToast(errorMessage, 'error');
+                if (process.env.NODE_ENV === 'development') {
+                  console.log('[Interceptor] Toast shown (retry):', errorMessage);
+                }
+              } catch (err) {
+                console.error('[Interceptor] Error showing toast (retry):', err);
+              }
+            } else {
+              console.warn('[Interceptor] Toast not available after retry, error:', errorMessage);
+            }
+          }, 500);
+        }
+      }
+
       return Promise.reject(error);
     }
   );

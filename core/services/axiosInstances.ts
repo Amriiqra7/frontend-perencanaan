@@ -18,7 +18,7 @@ export const createAxiosInstance = (
   });
 
   setupInterceptorsTo(instance, {
-    disableErrorToast: true,
+    disableErrorToast: false,
     ...options,
   });
 

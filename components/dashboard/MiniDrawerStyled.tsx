@@ -31,7 +31,6 @@ const StyledDrawer = styled(Drawer, {
     }),
     overflowX: 'hidden',
     borderRight: `1px solid ${theme.palette.divider}`,
-    boxShadow: theme.shadows[8],
   },
 }));
 
