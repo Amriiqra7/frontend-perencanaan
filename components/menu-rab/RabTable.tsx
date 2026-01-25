@@ -180,7 +180,7 @@ export default function RabTable({
   const table = useMaterialReactTable({
     columns,
     data,
-    enableColumnResizing: true,
+    enableColumnResizing: false,
     enableColumnOrdering: false,
     enableStickyHeader: true,
     enableDensityToggle: false,

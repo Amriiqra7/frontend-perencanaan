@@ -1,8 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
-import { getMenu } from '@/core/services/api';
+'use client';
+
+import { useMemo } from 'react';
+import useSWR from 'swr';
 import { getSidebar, setSidebar } from '@/lib/sidebar';
 import { getBackendToken } from '@/lib/session';
 import type { MenuGroup } from '@/types/settings';
+import * as API from '@/core/services/api';
 
 interface UseMenuReturn {
   menuData: MenuGroup[] | null;
@@ -12,52 +15,48 @@ interface UseMenuReturn {
 }
 
 export function useMenu(): UseMenuReturn {
-  const [menuData, setMenuData] = useState<MenuGroup[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const token = getBackendToken();
+  const shouldFetch = !!token;
 
-  const fetchMenu = useCallback(async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const cachedMenu = getSidebar();
-      if (cachedMenu) {
-        setMenuData(cachedMenu);
-        setIsLoading(false);
-        return;
+  const {
+    data: response,
+    error,
+    isValidating,
+    mutate,
+  } = useSWR(
+    shouldFetch ? 'menu' : null,
+    () => API.getMenu.getAll(),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      onSuccess: (data) => {
+        if (data && data.data && Array.isArray(data.data)) {
+          setSidebar(data.data);
+          }
+        },
       }
+  );
 
-      const token = getBackendToken();
-      if (!token) {
-        throw new Error('Token tidak ditemukan. Silakan login ulang.');
-      }
-
-      const response = await getMenu.getAll();
-
-      if (response && response.data && Array.isArray(response.data)) {
-        setSidebar(response.data);
-        setMenuData(response.data);
-      } else {
-        throw new Error('Format data menu tidak valid');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal memuat menu';
-      setError(errorMessage);
-      console.error('Error fetching menu:', err);
-    } finally {
-      setIsLoading(false);
+  const menuData = useMemo(() => {
+    if (response && response.data && Array.isArray(response.data)) {
+      return response.data; 
     }
-  }, []);
+    return getSidebar();
+  }, [response]);
 
-  useEffect(() => {
-    fetchMenu();
-  }, [fetchMenu]);
+  const errorMessage = useMemo(() => {
+    if (error) {
+      return error instanceof Error ? error.message : 'Gagal memuat menu';
+    }
+    return null;
+  }, [error]);
 
   return {
     menuData,
-    isLoading,
-    error,
-    refetch: fetchMenu,
+    isLoading: isValidating,
+    error: errorMessage,
+    refetch: async () => {
+      await mutate();
+    },
   };
 }

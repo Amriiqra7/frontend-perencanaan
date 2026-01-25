@@ -2,11 +2,27 @@
 
 import React, { useState, useMemo } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import useSWR from 'swr';
 import RabHeader from '@/components/menu-rab/RabHeader';
 import RabTable from '@/components/menu-rab/RabTable';
 import FilterDrawer from '@/components/menu-rab/FilterDrawer';
-import { useRab } from '@/hooks/useRab';
-import type { RabFilter, RabSummary as RabSummaryType, RabType } from '@/types/rab';
+import { getRab } from '@/core/services/api';
+import type { RabData, RabFilter, RabSummary as RabSummaryType, RabType, RabResponse } from '@/types/rab';
+
+const mapRabData = (apiData: RabData[]): RabData[] => {
+  return apiData.map((item) => ({
+    ...item,
+    noRab: item.detail_rab?.no_rab,
+    tglRab: item.detail_rab?.tanggal_rab,
+    jenisRab: item.detail_rab?.jenis_rab,
+    nopel: item.detail_rab?.no_pelanggan,
+    nama: item.detail_rab?.nama_pelanggan,
+    alamat: item.detail_rab?.alamat,
+    wilayah: item.detail_rab?.wilayah,
+    setuju: false,
+    lunas: false,
+  }));
+};
 
 export default function MenuRabList(): React.ReactElement {
   const [rabType, setRabType] = useState<RabType>('pelanggan');
@@ -15,7 +31,57 @@ export default function MenuRabList(): React.ReactElement {
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
 
-  const { data, isLoading, pagination, refetch } = useRab(filter, page, limit);
+  const queryParams = useMemo(() => {
+    const params: Record<string, unknown> = {
+      page,
+      limit,
+    };
+    
+    if (filter?.noRab) {
+      params.q = filter.noRab;
+    }
+    
+    if (filter?.tglRab) {
+      params.tanggalRab = filter.tglRab;
+    }
+    
+    return params;
+  }, [filter, page, limit]);
+
+  const {
+    data: response,
+    error,
+    isValidating,
+    mutate,
+  } = useSWR<RabResponse>(
+    ['rab', queryParams],
+    () => getRab.getAll(queryParams),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      onError: (error) => {
+        console.error('[MenuRabList] Failed to load RAB data!', error);
+      },
+      onSuccess: (data) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[MenuRabList] RAB data loaded successfully:', data);
+        }
+      },
+    }
+  );
+
+  const data = useMemo(() => {
+    if (response && response.success && response.dataL && Array.isArray(response.dataL)) {
+      return mapRabData(response.dataL);
+    }
+    return [];
+  }, [response]);
+
+  const pagination = useMemo(() => {
+    return response?.pagination || null;
+  }, [response]);
+
+  const isLoading = isValidating;
 
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) {
@@ -59,8 +125,8 @@ export default function MenuRabList(): React.ReactElement {
     };
   }, [filteredData, pagination]);
 
-  const handleDataChange = (): void => {
-    refetch();
+  const handleDataChange = async (): Promise<void> => {
+    await mutate();
   };
 
   const handleFilterChange = (newFilter: RabFilter): void => {
@@ -71,7 +137,7 @@ export default function MenuRabList(): React.ReactElement {
     setFilter({});
   };
 
-  return (
+    return (
     <Box sx={{ width: '100%', p: 1 }}>
       <RabHeader
         rabType={rabType}

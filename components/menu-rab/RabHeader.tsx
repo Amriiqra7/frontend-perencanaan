@@ -13,6 +13,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import { Filter, ExportSquare, Add } from 'iconsax-reactjs';
+import ModalTambah from './ModalTambah';
 import type { RabType } from '@/types/rab';
 
 interface RabHeaderProps {
@@ -31,6 +32,8 @@ export default function RabHeader({
   onExport,
 }: RabHeaderProps): React.ReactElement {
   const [addPopoverAnchor, setAddPopoverAnchor] = useState<HTMLElement | null>(null);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [selectedRabType, setSelectedRabType] = useState<RabType>('pelanggan');
 
   const handleAddClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAddPopoverAnchor(event.currentTarget);
@@ -41,8 +44,13 @@ export default function RabHeader({
   };
 
   const handleRabTypeSelect = (type: RabType): void => {
-    onRabTypeChange(type);
-    handleAddClose();
+    setSelectedRabType(type);
+    setAddPopoverAnchor(null);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (): void => {
+    setDialogOpen(false);
   };
 
   const handleExportClick = (): void => {
@@ -138,6 +146,12 @@ export default function RabHeader({
             </MenuItem>
           </MenuList>
         </Popover>
+
+        <ModalTambah
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          rabType={selectedRabType}
+        />
       </Box>
     </Box>
   );
