@@ -18,6 +18,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
+import ProsesTambahRabDrawer from './ProsesTambahRabDrawer';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Trash } from 'iconsax-reactjs';
 import useSWR from 'swr';
@@ -73,6 +74,7 @@ export default function MaterialForm({
   const [expandedPaket, setExpandedPaket] = useState<boolean>(true);
   const [expandedKeranjang, setExpandedKeranjang] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const paketItemsRef = useRef(paketItems);
   const cartItemsRef = useRef(cartItems);
@@ -822,6 +824,7 @@ export default function MaterialForm({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                   variant="outlined"
+                  onClick={() => setDrawerOpen(true)}
                   sx={{
                     textTransform: 'none',
                     borderColor: '#FF8C00',
@@ -1169,6 +1172,7 @@ export default function MaterialForm({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Button
                     variant="outlined"
+                    onClick={() => setDrawerOpen(true)}
                     sx={{
                       textTransform: 'none',
                       borderColor: '#FF8C00',
@@ -1187,6 +1191,13 @@ export default function MaterialForm({
           </Box>
         ) : null}
       </Paper>
+
+      {/* Drawer Proses Tambah RAB */}
+      <ProsesTambahRabDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        totalMaterial={totalMaterial}
+      />
     </Box>
   );
 }
