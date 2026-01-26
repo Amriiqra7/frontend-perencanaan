@@ -4,11 +4,17 @@ import { MenuGroup } from "@/types/settings";
 
 const STORAGE_KEY = "settings_p";
 
-export function setSidebar(sidebar: MenuGroup[]) {
+export function setSidebar(sidebar: MenuGroup[]): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sidebar));
 }
 
 export function getSidebar(): MenuGroup[] | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
   try {
@@ -18,6 +24,9 @@ export function getSidebar(): MenuGroup[] | null {
   }
 }
 
-export function deleteSidebar() {
+export function deleteSidebar(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
   localStorage.removeItem(STORAGE_KEY);
 }

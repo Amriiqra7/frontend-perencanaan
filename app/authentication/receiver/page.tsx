@@ -39,7 +39,9 @@ function AuthReceiverContent() {
           deleteSidebar();
 
           // Simpan user data ke localStorage
-          localStorage.setItem('user', JSON.stringify(result.user));
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user', JSON.stringify(result.user));
+          }
 
           setStatus("Memvalidasi token...");
           try {
