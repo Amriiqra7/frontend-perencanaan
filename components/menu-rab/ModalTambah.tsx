@@ -9,7 +9,11 @@ import {
   Tab,
   Box,
   Button,
+  TextField,
+  InputAdornment,
+  useTheme,
 } from '@mui/material';
+import { SearchNormal1 } from 'iconsax-reactjs';
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -35,11 +39,14 @@ export default function SelectRabDialog({
   onClose,
   rabType,
 }: SelectRabDialogProps): React.ReactElement {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [pagePasangBaru, setPagePasangBaru] = useState<number>(1);
   const [pagePelayananLain, setPagePelayananLain] = useState<number>(1);
   const [limit] = useState<number>(10);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const columnOrder = useMemo(() => {
     if (activeTab === 0) {
@@ -87,7 +94,38 @@ export default function SelectRabDialog({
     return [];
   }, [pelayananLainResponse]);
 
-  const currentData: TableData[] = activeTab === 0 ? pasangBaruData : pelayananLainData;
+  const filteredPasangBaruData: PasangBaruData[] = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return pasangBaruData;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return pasangBaruData.filter((item) => {
+      return (
+        (item.no_regis?.toLowerCase().includes(query)) ||
+        (item.nama?.toLowerCase().includes(query)) ||
+        (item.alamat?.toLowerCase().includes(query)) ||
+        (item.jenis?.toLowerCase().includes(query))
+      );
+    });
+  }, [pasangBaruData, searchQuery]);
+
+  const filteredPelayananLainData: PelayananLainData[] = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return pelayananLainData;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return pelayananLainData.filter((item) => {
+      return (
+        (item.no_regis?.toLowerCase().includes(query)) ||
+        (item.nama?.toLowerCase().includes(query)) ||
+        (item.alamat?.toLowerCase().includes(query)) ||
+        (item.jenis?.toLowerCase().includes(query)) ||
+        (item.no_pelanggan?.toLowerCase().includes(query))
+      );
+    });
+  }, [pelayananLainData, searchQuery]);
+
+  const currentData: TableData[] = activeTab === 0 ? filteredPasangBaruData : filteredPelayananLainData;
   const isLoading = activeTab === 0 ? isLoadingPasangBaru : isLoadingPelayananLain;
 
   const currentPagination: RabPagination | null = useMemo(() => {
@@ -100,12 +138,29 @@ export default function SelectRabDialog({
 
   const handleTabChange = useCallback((_event: React.SyntheticEvent, newValue: number): void => {
     setActiveTab(newValue);
+    setSearchQuery('');
     if (newValue === 0) {
       setPagePasangBaru(1);
     } else {
       setPagePelayananLain(1);
     }
   }, []);
+
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+    setSearchQuery(event.target.value);
+    if (activeTab === 0) {
+      setPagePasangBaru(1);
+    } else {
+      setPagePelayananLain(1);
+    }
+  }, [activeTab]);
+
+  const handleClose = useCallback((): void => {
+    setSearchQuery('');
+    setPagePasangBaru(1);
+    setPagePelayananLain(1);
+    onClose();
+  }, [onClose]);
 
   const handlePageChange = useCallback((newPage: number): void => {
     if (activeTab === 0) {
@@ -116,8 +171,27 @@ export default function SelectRabDialog({
   }, [activeTab]);
 
   const handleProses = useCallback((row: MRT_Row<TableData>): void => {
-    router.push('/menu-rab/new');
-  }, [router]);
+    const isPasangBaru = activeTab === 0;
+    const rowData = row.original;
+    
+    let pelangganId: string | null = null;
+    
+    if (!isPasangBaru) {
+      if ('pelanggan_id' in rowData && rowData.pelanggan_id) {
+        pelangganId = rowData.pelanggan_id.toString();
+      }
+    } else {
+      pelangganId = rowData.id.toString();
+    }
+    
+    const params = new URLSearchParams();
+    params.set('type', isPasangBaru ? 'pasang-baru' : 'pelayanan-lain');
+    if (pelangganId) {
+      params.set('pelangganId', pelangganId);
+    }
+    
+    router.push(`/menu-rab/new?${params.toString()}`);
+  }, [router, activeTab]);
 
   const columns = useMemo<MRT_ColumnDef<TableData>[]>(
     () => {
@@ -229,26 +303,36 @@ export default function SelectRabDialog({
     enablePagination: false,
     enableBottomToolbar: false,
     enableTopToolbar: false,
+    enableSorting: false,
+    enableColumnActions: false,
+    enableColumnFilters: false,
     muiTableContainerProps: { sx: { maxHeight: '400px' } },
     muiTablePaperProps: { sx: { boxShadow: 'none' } },
     muiTableHeadCellProps: {
       sx: {
-        backgroundColor: '#FFF8E1',
+        backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
         fontWeight: 600,
         fontSize: '0.875rem',
         whiteSpace: 'nowrap',
         overflow: 'visible',
         textOverflow: 'clip',
         padding: '16px',
+        color: theme.palette.text.primary,
       },
     },
-    muiTableBodyCellProps: { sx: { fontSize: '0.875rem' } },
+    muiTableBodyCellProps: { 
+      sx: { 
+        fontSize: '0.875rem',
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+      } 
+    },
   });
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="lg"
       fullWidth
       PaperProps={{
@@ -272,11 +356,34 @@ export default function SelectRabDialog({
       </DialogTitle>
       <DialogContent>
         <Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Cari berdasarkan No Regis, Nama, Alamat, Jenis..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchNormal1 size={20} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: theme.palette.background.paper,
+                },
+              }}
+            />
+          </Box>
           <MaterialReactTable table={table} />
-          <TablePagination
-            pagination={currentPagination}
-            onPageChange={handlePageChange}
-          />
+          {!searchQuery.trim() && (
+            <TablePagination
+              pagination={currentPagination}
+              onPageChange={handlePageChange}
+            />
+          )}
         </Box>
       </DialogContent>
     </Dialog>

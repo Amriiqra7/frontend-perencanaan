@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Pagination } from '@mui/material';
+import { Box, Pagination, useTheme } from '@mui/material';
 import type { RabPagination } from '@/types/rab';
 
 interface TablePaginationProps {
@@ -13,6 +13,9 @@ export default function TablePagination({
   pagination,
   onPageChange,
 }: TablePaginationProps): React.ReactElement | null {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+  
   if (!pagination || pagination.totalPages <= 1) {
     return null;
   }
@@ -24,8 +27,8 @@ export default function TablePagination({
         justifyContent: 'end',
         alignItems: 'end',
         p: 2,
-        borderTop: '1px solid #FFE0B2',
-        backgroundColor: '#FFF8E1',
+        borderTop: `1px solid ${theme.palette.divider}`,
+        backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
       }}
     >
       <Pagination
@@ -35,7 +38,7 @@ export default function TablePagination({
         color="primary"
         sx={{
           '& .MuiPaginationItem-root': {
-            color: '#FF8C00',
+            color: theme.palette.text.primary,
             '&.Mui-selected': {
               backgroundColor: '#FF8C00',
               color: '#fff',
@@ -44,7 +47,7 @@ export default function TablePagination({
               },
             },
             '&:hover': {
-              backgroundColor: '#FFF3E0',
+              backgroundColor: isDarkMode ? 'rgba(255, 140, 0, 0.2)' : '#FFF3E0',
             },
           },
         }}

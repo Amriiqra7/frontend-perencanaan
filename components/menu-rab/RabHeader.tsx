@@ -11,6 +11,7 @@ import {
   MenuList,
   MenuItem,
   ListItemText,
+  useTheme,
 } from '@mui/material';
 import { Filter, ExportSquare, Add } from 'iconsax-reactjs';
 import ModalTambah from './ModalTambah';
@@ -31,6 +32,8 @@ export default function RabHeader({
   filterOpen = true,
   onExport,
 }: RabHeaderProps): React.ReactElement {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [addPopoverAnchor, setAddPopoverAnchor] = useState<HTMLElement | null>(null);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [selectedRabType, setSelectedRabType] = useState<RabType>('pelanggan');
@@ -70,7 +73,7 @@ export default function RabHeader({
         pt: 2,
       }}
     >
-      <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
+      <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
         Menu RAB
       </Typography>
 
@@ -85,7 +88,7 @@ export default function RabHeader({
             color: '#FF8C00',
             '&:hover': {
               borderColor: '#FF8C00',
-              backgroundColor: '#FFF3E0',
+              backgroundColor: isDarkMode ? 'rgba(255, 140, 0, 0.2)' : '#FFF3E0',
             },
           }}
         >
@@ -113,9 +116,9 @@ export default function RabHeader({
               onClick={onFilterToggle}
               sx={{
                 backgroundColor: filterOpen ? '#FF8C00' : 'transparent',
-                color: filterOpen ? '#fff' : '#666',
+                color: filterOpen ? '#fff' : (isDarkMode ? '#b0b0b0' : '#666'),
                 '&:hover': {
-                  backgroundColor: filterOpen ? '#FF7F00' : '#FFF8E1',
+                  backgroundColor: filterOpen ? '#FF7F00' : (isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#FFF8E1'),
                 },
               }}
             >

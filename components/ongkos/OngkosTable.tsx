@@ -7,7 +7,7 @@ import {
   type MRT_ColumnDef,
   type MRT_Row,
 } from 'material-react-table';
-import { Box, IconButton, Popover, MenuList, MenuItem, ListItemIcon, ListItemText, Typography, Pagination } from '@mui/material';
+import { Box, IconButton, Popover, MenuList, MenuItem, ListItemIcon, ListItemText, Typography, Pagination, useTheme } from '@mui/material';
 import { Edit, Trash, More, Eye } from 'iconsax-reactjs';
 import type { OngkosData, OngkosPagination } from '@/types/ongkos';
 
@@ -28,6 +28,8 @@ export default function OngkosTable({
   onDelete,
   onDetail,
 }: OngkosTableProps): React.ReactElement {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [popoverAnchor, setPopoverAnchor] = useState<{ element: HTMLElement; row: OngkosData } | null>(null);
 
   const handleMoreClick = useCallback((event: React.MouseEvent<HTMLElement>, row: MRT_Row<OngkosData>): void => {
@@ -77,11 +79,11 @@ export default function OngkosTable({
               sx={{
                 padding: '4px',
                 '&:hover': {
-                  backgroundColor: '#FFF8E1',
+                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#FFF8E1',
                 },
               }}
             >
-              <More size={18} color="#666" />
+              <More size={18} color={isDarkMode ? '#b0b0b0' : '#666'} />
             </IconButton>
             <IconButton
               size="small"
@@ -89,11 +91,11 @@ export default function OngkosTable({
               sx={{
                 padding: '4px',
                 '&:hover': {
-                  backgroundColor: '#FFF8E1',
+                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#FFF8E1',
                 },
               }}
             >
-              <Eye size={18} color="#666" />
+              <Eye size={18} color={isDarkMode ? '#b0b0b0' : '#666'} />
             </IconButton>
           </Box>
         ),
@@ -142,7 +144,7 @@ export default function OngkosTable({
         },
       },
     ],
-    [handleMoreClick, handleDetailClick]
+    [handleMoreClick, handleDetailClick, isDarkMode, theme]
   );
 
   const table = useMaterialReactTable({
@@ -168,24 +170,27 @@ export default function OngkosTable({
     muiTablePaperProps: {
       sx: {
         boxShadow: 'none',
-        border: '1px solid #FFE0B2',
+        border: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`,
         margin: 0,
+        backgroundColor: theme.palette.background.paper,
       },
     },
     muiTableHeadCellProps: {
       sx: {
-        backgroundColor: '#FFF8E1',
+        backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
         fontWeight: 600,
         fontSize: '0.875rem',
         whiteSpace: 'nowrap',
         overflow: 'visible',
         textOverflow: 'clip',
+        color: theme.palette.text.primary,
       },
     },
     muiTableBodyCellProps: {
       sx: {
         fontSize: '0.875rem',
-        backgroundColor: '#fff',
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       },
     },
     renderBottomToolbarCustomActions: () => (
@@ -194,7 +199,7 @@ export default function OngkosTable({
           display: 'flex',
           flexDirection: 'row',
           width: '100%',
-          backgroundColor: '#FFF8E1',
+          backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
           justifyContent: 'flex-end',
           alignItems: 'center',
           p: 2,
@@ -219,7 +224,7 @@ export default function OngkosTable({
                   },
                 },
                 '&:hover': {
-                  backgroundColor: '#FFF3E0',
+                  backgroundColor: isDarkMode ? 'rgba(255, 140, 0, 0.2)' : '#FFF3E0',
                 },
               },
             }}

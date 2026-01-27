@@ -5,13 +5,8 @@ export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const hasToken = request.cookies.has('token_p');
 
-    // Allow root path to proceed
-    if (pathname === "/") {
-        return NextResponse.next();
-    }
-
     // Allow access to the receiver page without a token
-    if (pathname.startsWith("/authentication/receiver") || pathname.startsWith("/pub")) {
+    if (pathname.startsWith("/authentication/receiver")) {
         return NextResponse.next();
     }
 

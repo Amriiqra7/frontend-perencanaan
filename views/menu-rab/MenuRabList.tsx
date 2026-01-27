@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import RabHeader from '@/components/menu-rab/RabHeader';
 import RabTable from '@/components/menu-rab/RabTable';
 import FilterDrawer from '@/components/menu-rab/FilterDrawer';
+import RabDetailDialog from '@/components/menu-rab/RabDetailDialog';
 import { getRab } from '@/core/services/api';
 import type { RabData, RabFilter, RabSummary as RabSummaryType, RabType, RabResponse } from '@/types/rab';
 
@@ -30,6 +31,8 @@ export default function MenuRabList(): React.ReactElement {
   const [filter, setFilter] = useState<RabFilter>({});
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
+  const [detailDialogOpen, setDetailDialogOpen] = useState<boolean>(false);
+  const [selectedRabId, setSelectedRabId] = useState<number | null>(null);
 
   const queryParams = useMemo(() => {
     const params: Record<string, unknown> = {
@@ -37,12 +40,40 @@ export default function MenuRabList(): React.ReactElement {
       limit,
     };
     
-    if (filter?.noRab) {
-      params.q = filter.noRab;
-    }
-    
     if (filter?.tglRab) {
       params.tanggalRab = filter.tglRab;
+    }
+    
+    if (filter?.lunas !== undefined) {
+      params.isLunas = filter.lunas ? 1 : 0;
+    }
+    
+    if (filter?.setuju !== undefined) {
+      params.isSetuju = filter.setuju ? 1 : 0;
+    }
+    
+    if (filter?.noRab) {
+      params.noRab = filter.noRab;
+    }
+    
+    if (filter?.jenisRab) {
+      params.jenisRab = filter.jenisRab;
+    }
+    
+    if (filter?.noPel) {
+      params.noPelanggan = filter.noPel;
+    }
+    
+    if (filter?.nama) {
+      params.namaPelanggan = filter.nama;
+    }
+    
+    if (filter?.wilayah_id) {
+      params.wilayahId = filter.wilayah_id;
+    }
+    
+    if (filter?.rayon_id) {
+      params.rayonId = filter.rayon_id;
     }
     
     return params;
@@ -83,36 +114,7 @@ export default function MenuRabList(): React.ReactElement {
 
   const isLoading = isValidating;
 
-  const filteredData = useMemo(() => {
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    return data.filter((item) => {
-      if (filter.jenisRab && !item.jenisRab?.toLowerCase().includes(filter.jenisRab.toLowerCase())) {
-        return false;
-      }
-      if (filter.noPel && !item.nopel?.toLowerCase().includes(filter.noPel.toLowerCase())) {
-        return false;
-      }
-      if (filter.nama && !item.nama?.toLowerCase().includes(filter.nama.toLowerCase())) {
-        return false;
-      }
-      if (filter.wilayah && !item.wilayah?.toLowerCase().includes(filter.wilayah.toLowerCase())) {
-        return false;
-      }
-      if (filter.rayon && !item.rayon?.toLowerCase().includes(filter.rayon.toLowerCase())) {
-        return false;
-      }
-      if (filter.setuju !== undefined && item.setuju !== filter.setuju) {
-        return false;
-      }
-      if (filter.lunas !== undefined && item.lunas !== filter.lunas) {
-        return false;
-      }
-      return true;
-    });
-  }, [data, filter]);
+  const filteredData = data;
 
   const summary: RabSummaryType = useMemo(() => {
     const totalRab = filteredData.reduce((sum, item) => {
@@ -131,11 +133,37 @@ export default function MenuRabList(): React.ReactElement {
 
   const handleFilterChange = (newFilter: RabFilter): void => {
     setFilter(newFilter);
+    setPage(1);
   };
 
   const handleResetFilter = (): void => {
     setFilter({});
   };
+
+  const handleDetail = (rowIndex: number): void => {
+    const selectedData = filteredData[rowIndex];
+    if (selectedData && selectedData.id) {
+      setSelectedRabId(selectedData.id);
+      setDetailDialogOpen(true);
+    }
+  };
+
+  const handleCloseDetailDialog = (): void => {
+    setDetailDialogOpen(false);
+    setSelectedRabId(null);
+  };
+
+  const {
+    data: rabDetailResponse,
+    isLoading: isLoadingDetail,
+  } = useSWR(
+    detailDialogOpen && selectedRabId ? ['rab-detail', selectedRabId] : null,
+    () => getRab.getById(selectedRabId!),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    }
+  );
 
     return (
     <Box sx={{ width: '100%', p: 1 }}>
@@ -176,14 +204,15 @@ export default function MenuRabList(): React.ReactElement {
             onPageChange={setPage}
             onDataChange={handleDataChange}
             onEdit={(rowIndex) => {
-              console.log('Edit row:', rowIndex);
+              const selectedData = filteredData[rowIndex];
+              if (selectedData && selectedData.id) {
+                window.location.href = `/menu-rab/edit/${selectedData.id}`;
+              }
             }}
             onDelete={(rowIndex) => {
               console.log('Delete row:', rowIndex);
             }}
-            onDetail={(rowIndex) => {
-              console.log('Detail row:', rowIndex);
-            }}
+            onDetail={handleDetail}
           />
         </Box>
 
@@ -195,6 +224,14 @@ export default function MenuRabList(): React.ReactElement {
           onReset={handleResetFilter}
         />
       </Box>
+
+      <RabDetailDialog
+        open={detailDialogOpen}
+        onClose={handleCloseDetailDialog}
+        rabId={selectedRabId}
+        rabData={rabDetailResponse?.success ? rabDetailResponse.data : null}
+        isLoading={isLoadingDetail}
+      />
     </Box>
   );
 }

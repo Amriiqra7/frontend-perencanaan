@@ -31,6 +31,12 @@ export const getRab: RabService = {
             })
         ),
 
+    getById: (id: number) =>
+        handleRequest(axiosInstance.get(`/api/perencanaan/rab/${id}`)),
+
+    update: (id: number, data) =>
+        handleRequest(axiosInstance.put(`/api/perencanaan/rab/${id}`, data)),
+
     getPasangBaru: (params?: Record<string, unknown>) =>
         handleRequest(
             axiosInstance.get("/api/perencanaan/pendaftaran-pel", {
@@ -58,6 +64,68 @@ export const getRab: RabService = {
                 params: removeEmptyParams(params),
             })
         ),
+
+    getComboPaketOngkos: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/paket-ongkos", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboOngkos: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/ongkos", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboJasa: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/jasa", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboPPN: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/ppn", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboGolongan: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/loket/info/golongan", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboDiameter: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/filter/diameter", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboWilayah: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/loket/info/wilayah", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getComboRayon: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/hublang/info/rayon-wilayah", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getByPelanggan: (id: number) =>
+        handleRequest(axiosInstance.get(`/api/perencanaan/pelanggan/${id}`)),
+
+    create: (data) =>
+        handleRequest(axiosInstance.post("/api/perencanaan/rab", data)),
 }
 
 export const getOngkos: OngkosService = {

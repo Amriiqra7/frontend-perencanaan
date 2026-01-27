@@ -7,7 +7,7 @@ import {
   type MRT_ColumnDef,
   type MRT_Row,
 } from 'material-react-table';
-import { Box, IconButton, Popover, MenuList, MenuItem, ListItemIcon, ListItemText, Typography, Pagination } from '@mui/material';
+import { Box, IconButton, Popover, MenuList, MenuItem, ListItemIcon, ListItemText, Typography, Pagination, useTheme } from '@mui/material';
 import { Edit, Trash, TickCircle, CloseCircle, More, Eye } from 'iconsax-reactjs';
 import type { RabData, RabSummary, RabPagination } from '@/types/rab';
 
@@ -32,6 +32,8 @@ export default function RabTable({
   onDelete,
   onDetail,
 }: RabTableProps): React.ReactElement {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [popoverAnchor, setPopoverAnchor] = useState<{ element: HTMLElement; rowIndex: number } | null>(null);
 
   const handleMoreClick = useCallback((event: React.MouseEvent<HTMLElement>, row: MRT_Row<RabData>): void => {
@@ -73,28 +75,30 @@ export default function RabTable({
         enableColumnFilter: false,
         enableSorting: false,
         Cell: ({ row }) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-start' }}>
             <IconButton
               size="small"
               onClick={(e) => handleMoreClick(e, row)}
               sx={{
+                padding: '4px',
                 '&:hover': {
-                  backgroundColor: '#FFF8E1',
+                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#FFF8E1',
                 },
               }}
             >
-              <More size={20} color="#666" />
+              <More size={18} color={isDarkMode ? '#b0b0b0' : '#666'} />
             </IconButton>
             <IconButton
               size="small"
               onClick={() => handleDetailClick(row)}
               sx={{
+                padding: '4px',
                 '&:hover': {
-                  backgroundColor: '#FFF8E1',
+                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#FFF8E1',
                 },
               }}
             >
-              <Eye size={18} color="#666" />
+              <Eye size={18} color={isDarkMode ? '#b0b0b0' : '#666'} />
             </IconButton>
           </Box>
         ),
@@ -112,7 +116,7 @@ export default function RabTable({
           const iconColor = isTrue ? '#4CAF50' : '#f44336';
 
           return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
               <IconComponent size={20} color={iconColor} />
             </Box>
           );
@@ -131,7 +135,7 @@ export default function RabTable({
           const iconColor = isTrue ? '#4CAF50' : '#f44336';
 
           return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
               <IconComponent size={20} color={iconColor} />
             </Box>
           );
@@ -174,7 +178,7 @@ export default function RabTable({
         minSize: 300,
       },
     ],
-    [handleMoreClick, handleDetailClick]
+    [handleMoreClick, handleDetailClick, isDarkMode, theme]
   );
 
   const table = useMaterialReactTable({
@@ -187,8 +191,11 @@ export default function RabTable({
     enableFullScreenToggle: false,
     enableHiding: false,
     enablePagination: false,
-    enableBottomToolbar: false,
+    enableBottomToolbar: true,
     enableTopToolbar: false,
+    enableSorting: false,
+    enableColumnActions: false,
+    enableColumnFilters: false,
     muiTableContainerProps: {
       sx: {
         maxHeight: '600px',
@@ -197,19 +204,22 @@ export default function RabTable({
     muiTablePaperProps: {
       sx: {
         boxShadow: 'none',
-        border: '1px solid #FFE0B2',
+        border: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`,
         margin: 0,
+        backgroundColor: theme.palette.background.paper,
       },
     },
     muiTableHeadCellProps: {
       sx: {
-        backgroundColor: '#FFF8E1',
+        backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
         fontWeight: 600,
         fontSize: '0.875rem',
         whiteSpace: 'nowrap',
         overflow: 'visible',
         textOverflow: 'clip',
         padding: '16px',
+        textAlign: 'left',
+        color: theme.palette.text.primary,
         '& .MuiTableSortLabel-root': {
           whiteSpace: 'nowrap',
           overflow: 'visible',
@@ -229,6 +239,10 @@ export default function RabTable({
     muiTableBodyCellProps: {
       sx: {
         fontSize: '0.875rem',
+        backgroundColor: theme.palette.background.paper,
+        padding: '16px',
+        textAlign: 'left',
+        color: theme.palette.text.primary,
       },
     },
     renderBottomToolbarCustomActions: () => (
@@ -237,8 +251,8 @@ export default function RabTable({
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
-          backgroundColor: '#FFF8E1',
-          borderTop: '1px solid #FFE0B2',
+          backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
+          borderTop: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`,
         }}
       >
         <Box
@@ -250,18 +264,18 @@ export default function RabTable({
           }}
         >
           <Box>
-            <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 0.5 }}>
               Jumlah
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
               {summary.jmlRab}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 0.5 }}>
               Total
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
               {summary.totalRab.toLocaleString('id-ID')}
             </Typography>
           </Box>
@@ -273,7 +287,7 @@ export default function RabTable({
               justifyContent: 'center',
               alignItems: 'center',
               p: 2,
-              borderTop: '1px solid #FFE0B2',
+              borderTop: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`,
             }}
           >
             <Pagination
@@ -292,7 +306,7 @@ export default function RabTable({
                     },
                   },
                   '&:hover': {
-                    backgroundColor: '#FFF3E0',
+                    backgroundColor: isDarkMode ? 'rgba(255, 140, 0, 0.2)' : '#FFF3E0',
                   },
                 },
               }}

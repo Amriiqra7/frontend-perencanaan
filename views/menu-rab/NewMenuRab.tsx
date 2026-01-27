@@ -1,19 +1,59 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
+import useSWR from 'swr';
 import DetailPelanggan from '@/components/menu-rab/DetailPelanggan';
 import MaterialForm, { type PaketItem, type CartItem } from '@/components/menu-rab/MaterialForm';
+import * as API from '@/core/services/api';
+import type { PelangganData } from '@/types/rab';
 
 export default function NewMenuRab(): React.ReactElement {
-  const [customerDetail] = useState({
-    noReg: 'REG000051',
-    nopel: '0705489',
-    nama: 'PARTONO',
-    alamat: 'SEMPU RT 17 PAKEMBINANGUN',
-    wilayah: 'Wilayah 1',
-    rayon: 'Rayon 1',
-  });
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type');
+  const pelangganId = searchParams.get('pelangganId');
+  const isPasangBaru = type === 'pasang-baru';
+
+  const {
+    data: pelangganResponse,
+    isLoading: isLoadingPelanggan,
+  } = useSWR(
+    pelangganId ? ['pelanggan', pelangganId] : null,
+    () => API.getRab.getByPelanggan(Number(pelangganId)),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    }
+  );
+
+  const pelangganData: PelangganData | null = useMemo(() => {
+    if (pelangganResponse && pelangganResponse.success && pelangganResponse.data) {
+      return pelangganResponse.data;
+    }
+    return null;
+  }, [pelangganResponse]);
+
+  const customerDetail = useMemo(() => {
+    if (pelangganData) {
+      return {
+        noReg: '',
+        nopel: pelangganData.no_pelanggan || '',
+        nama: pelangganData.nama || '',
+        alamat: pelangganData.alamat || '',
+        wilayah: pelangganData.namaWilayah || '',
+        rayon: pelangganData.namaRayon || '',
+      };
+    }
+    return {
+      noReg: '',
+      nopel: '',
+      nama: '',
+      alamat: '',
+      wilayah: '',
+      rayon: '',
+    };
+  }, [pelangganData]);
 
   const [paketItems, setPaketItems] = useState<PaketItem[]>([]);
 
@@ -35,8 +75,26 @@ export default function NewMenuRab(): React.ReactElement {
     setCartItems([...cartItems, newItem]);
   };
 
+  if (pelangganId && isLoadingPelanggan) {
+    return (
+      <Box sx={{ width: '100%', p: 0, minHeight: 'calc(100vh - 64px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ width: '100%', p: 0, minHeight: 'calc(100vh - 64px)', display: 'flex', gap: 1, alignItems: 'stretch' }}>
+    <Box 
+      sx={{ 
+        width: '100%', 
+        p: { xs: 1, sm: 1, md: 0 },
+        minHeight: 'calc(100vh - 64px)', 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 2, md: 1 },
+        alignItems: { xs: 'stretch', md: 'stretch' },
+      }}
+    >
       <DetailPelanggan
         customerDetail={customerDetail}
         onGantiClick={() => {
@@ -52,6 +110,9 @@ export default function NewMenuRab(): React.ReactElement {
         onPilihPaket={handlePilihPaket}
         onAddBarang={handleAddBarang}
         onTotalMaterialChange={setSubtotalMaterial}
+        isPasangBaru={isPasangBaru}
+        pelangganData={pelangganData}
+        pendaftaranId={pelangganData?.id || null}
       />
     </Box>
   );
