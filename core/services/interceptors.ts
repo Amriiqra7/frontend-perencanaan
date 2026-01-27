@@ -1,12 +1,7 @@
 import type { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type { InterceptorConfig, InterceptorOptions, HandleRequestFunction } from '@/types/core';
 import { getBackendToken, removeBackendToken } from '@/lib/session';
-
-let globalShowToast: ((message: string, severity?: 'error' | 'warning' | 'info' | 'success') => void) | null = null;
-
-export function setGlobalToast(showToast: (message: string, severity?: 'error' | 'warning' | 'info' | 'success') => void): void {
-  globalShowToast = showToast;
-}
+import toast from 'react-hot-toast';
 
 const INTERCEPTOR_CONFIG: InterceptorConfig = {
   TOAST_COOLDOWN: 2000,
@@ -99,33 +94,13 @@ export function setupInterceptorsTo(
           errorMessage = error.message;
         }
         
-        if (globalShowToast) {
-          try {
-            globalShowToast(errorMessage, 'error');
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[Interceptor] Toast shown:', errorMessage);
-            }
-          } catch (err) {
-            console.error('[Interceptor] Error showing toast:', err);
-          }
-        } else {
+        try {
+          toast.error(errorMessage);
           if (process.env.NODE_ENV === 'development') {
-            console.warn('[Interceptor] Toast not registered yet, will retry:', errorMessage);
+            console.log('[Interceptor] Toast shown:', errorMessage);
           }
-          setTimeout(() => {
-            if (globalShowToast) {
-              try {
-                globalShowToast(errorMessage, 'error');
-                if (process.env.NODE_ENV === 'development') {
-                  console.log('[Interceptor] Toast shown (retry):', errorMessage);
-                }
-              } catch (err) {
-                console.error('[Interceptor] Error showing toast (retry):', err);
-              }
-            } else {
-              console.warn('[Interceptor] Toast not available after retry, error:', errorMessage);
-            }
-          }, 500);
+        } catch (err) {
+          console.error('[Interceptor] Error showing toast:', err);
         }
       }
 

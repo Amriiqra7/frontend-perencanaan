@@ -3,6 +3,7 @@ import { createAxiosInstance } from "./axiosInstances";
 import { createHandleRequest } from "./interceptors";
 import type { MenuService } from '@/types/menu';
 import type { RabService } from '@/types/rab';
+import type { OngkosService } from '@/types/ongkos';
 
 const axiosInstance = createAxiosInstance();
 const handleRequest = createHandleRequest();
@@ -57,4 +58,32 @@ export const getRab: RabService = {
                 params: removeEmptyParams(params),
             })
         ),
+}
+
+export const getOngkos: OngkosService = {
+    getAll: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/ongkos", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    getById: (id: number) =>
+        handleRequest(axiosInstance.get(`/api/perencanaan/ongkos/${id}`)),
+
+    getComboSatuanOngkos: (params?: Record<string, unknown>) =>
+        handleRequest(
+            axiosInstance.get("/api/perencanaan/satuan-ongkos", {
+                params: removeEmptyParams(params),
+            })
+        ),
+
+    create: (data) =>
+        handleRequest(axiosInstance.post("/api/perencanaan/ongkos", data)),
+
+    update: (id: number, data) =>
+        handleRequest(axiosInstance.put(`/api/perencanaan/ongkos/${id}`, data)),
+
+    delete: (id: number) =>
+        handleRequest(axiosInstance.delete(`/api/perencanaan/ongkos/${id}`)),
 }
