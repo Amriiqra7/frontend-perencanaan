@@ -26,15 +26,15 @@ export default function RootLayout({
       <body
         className="antialiased"
       >
-        <ThemeProvider>
-          <ToastProviderWrapper>
-            <ConditionalDashboardLayout>
-              <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loading />}>
+          <ThemeProvider>
+            <ToastProviderWrapper>
+              <ConditionalDashboardLayout>
                 {children}
-              </Suspense>
-            </ConditionalDashboardLayout>
-          </ToastProviderWrapper>
-        </ThemeProvider>
+              </ConditionalDashboardLayout>
+            </ToastProviderWrapper>
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );
