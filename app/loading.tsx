@@ -13,10 +13,7 @@ export default function Loading(): React.ReactElement {
         justifyContent: 'center',
         minHeight: '100vh',
         gap: 2,
-        backgroundColor: '#f5f5f5',
-        '@media (prefers-color-scheme: dark)': {
-          backgroundColor: '#121212',
-        },
+        backgroundColor: 'rgba(128, 128, 128, 0.1)',
       }}
     >
       <CircularProgress 
