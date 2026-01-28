@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios, { type AxiosInstance } from "axios";
 import { INTERCEPTOR_CONFIG, setupInterceptorsTo } from "./interceptors";
 import type { AxiosInstanceOptions, AxiosInstanceConfig } from '@/types/core';
 

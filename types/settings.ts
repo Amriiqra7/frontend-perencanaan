@@ -1,7 +1,7 @@
 export interface MenuDetail {
   group_name: string;
   icon: string;
-  menu_id: number;
+  id: number;
   menu_name: string;
   link: string;
 }

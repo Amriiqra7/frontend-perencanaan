@@ -31,6 +31,9 @@ interface MaterialTabProps {
   onCartItemsChange: (items: CartItem[]) => void;
   onDrawerOpen: () => void;
   isProsesDisabled: boolean;
+  paketChecked?: boolean;
+  onPaketCheckedChange?: (checked: boolean) => void;
+  hargaPaketChecked?: boolean;
   onHargaPaketCheckedChange?: (checked: boolean) => void;
   initialPaketChecked?: boolean;
 }
@@ -42,14 +45,19 @@ export default function MaterialTab({
   onCartItemsChange,
   onDrawerOpen,
   isProsesDisabled,
+  paketChecked: controlledPaketChecked,
+  onPaketCheckedChange,
+  hargaPaketChecked: controlledHargaPaketChecked = false,
   onHargaPaketCheckedChange,
   initialPaketChecked = false,
 }: MaterialTabProps): React.ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [paketChecked, setPaketChecked] = useState<boolean>(initialPaketChecked);
+  const [paketCheckedLocal, setPaketCheckedLocal] = useState<boolean>(initialPaketChecked);
   const [selectedPaket, setSelectedPaket] = useState<PaketBarangData | null>(null);
-  const [hargaPaketChecked, setHargaPaketChecked] = useState<boolean>(false);
+  const hargaPaketChecked = controlledHargaPaketChecked;
+  
+  const paketChecked = controlledPaketChecked !== undefined ? controlledPaketChecked : paketCheckedLocal;
   const [pencarianBarang, setPencarianBarang] = useState<string>('');
   const [selectedBarang, setSelectedBarang] = useState<BarangData | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
@@ -81,10 +89,10 @@ export default function MaterialTab({
   }, [onCartItemsChange]);
 
   useEffect(() => {
-    if (initialPaketChecked) {
-      setPaketChecked(true);
+    if (initialPaketChecked && controlledPaketChecked === undefined) {
+      setPaketCheckedLocal(true);
     }
-  }, [initialPaketChecked]);
+  }, [initialPaketChecked, controlledPaketChecked]);
 
   const {
     data: paketBarangResponse,
@@ -248,11 +256,7 @@ export default function MaterialTab({
   }, []);
 
   const calculatePaketTotal = (item: PaketItem): number => {
-    if (hargaPaketChecked) {
-      return item.harga * item.qty;
-    } else {
-      return item.harga * item.qty;
-    }
+    return item.harga * item.qty;
   };
 
   const totalPaketFooter = useMemo(() => {
@@ -434,7 +438,13 @@ export default function MaterialTab({
             control={
               <Checkbox
                 checked={paketChecked}
-                onChange={(e) => setPaketChecked(e.target.checked)}
+                onChange={(e) => {
+                  if (onPaketCheckedChange) {
+                    onPaketCheckedChange(e.target.checked);
+                  } else {
+                    setPaketCheckedLocal(e.target.checked);
+                  }
+                }}
                 sx={{
                   color: '#FF8C00',
                   '&.Mui-checked': {
@@ -519,7 +529,6 @@ export default function MaterialTab({
                 <Checkbox
                   checked={hargaPaketChecked}
                   onChange={(e) => {
-                    setHargaPaketChecked(e.target.checked);
                     if (onHargaPaketCheckedChange) {
                       onHargaPaketCheckedChange(e.target.checked);
                     }

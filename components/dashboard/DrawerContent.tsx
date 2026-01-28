@@ -29,8 +29,8 @@ interface MenuItemProps {
 }
 
 function MenuItem({ menu, open, pathname, onNavigate }: MenuItemProps): React.ReactElement {
-  const isActive = 
-    pathname === menu.link || 
+  const isActive =
+    pathname === menu.link ||
     (menu.link !== '/' && pathname.startsWith(menu.link + '/')) ||
     (menu.link !== '/' && pathname === menu.link);
 
@@ -96,8 +96,6 @@ function MenuGroupItem({ group, open, pathname, onNavigate }: MenuGroupItemProps
     return null;
   }
 
-  const groupKey = group.group_name || group.group_link || (group.menus[0]?.menu_id ? `group-${group.menus[0].menu_id}` : 'unknown-group');
-
   return (
     <React.Fragment>
       {open && group.group_name && (
@@ -118,7 +116,7 @@ function MenuGroupItem({ group, open, pathname, onNavigate }: MenuGroupItemProps
       <List component="div" disablePadding>
         {group.menus.map((menuItem) => (
           <MenuItem
-            key={menuItem.menu_id}
+            key={menuItem.id}
             menu={menuItem}
             open={open}
             pathname={pathname}
@@ -142,8 +140,16 @@ export default function DrawerContent({ menuData, open }: DrawerContentProps): R
   };
 
   const staticMenuItems = useMemo(() => {
-    const staticMenu: MenuDetail = {
-      menu_id: 9999,
+    const dashboardMenu: MenuDetail = {
+      id: 9998,
+      menu_name: 'Dashboard',
+      icon: 'home',
+      link: '/',
+      group_name: 'Static Menu',
+    };
+
+    const rabMenu: MenuDetail = {
+      id: 9999,
       menu_name: 'Menu RAB',
       icon: 'document',
       link: '/menu-rab',
@@ -151,13 +157,23 @@ export default function DrawerContent({ menuData, open }: DrawerContentProps): R
     };
 
     return (
-      <MenuItem
-        key="static-menu-rab"
-        menu={staticMenu}
-        open={open}
-        pathname={pathname}
-        onNavigate={handleNavigate}
-      />
+      <>
+        <MenuItem
+          key="static-dashboard"
+          menu={dashboardMenu}
+          open={open}
+          pathname={pathname}
+          onNavigate={handleNavigate}
+        />
+        <Divider sx={{ my: 1 }} />
+        <MenuItem
+          key="static-menu-rab"
+          menu={rabMenu}
+          open={open}
+          pathname={pathname}
+          onNavigate={handleNavigate}
+        />
+      </>
     );
   }, [open, pathname, handleNavigate]);
 

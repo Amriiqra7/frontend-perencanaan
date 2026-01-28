@@ -15,10 +15,9 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   useTheme,
 } from '@mui/material';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { handleRupiahInputChange, parseRupiahInput, formatRupiahInput } from '@/config/global';
@@ -80,33 +79,6 @@ export default function ProsesTambahRabDrawer({
   const { mutate } = useSWRConfig();
   const isEditMode = rabId !== null && rabId !== undefined;
   
-  const initialDiskon = useMemo(() => {
-    if (isEditMode && rabData?.detail_rab) {
-      return formatRupiahInput(rabData.detail_rab.diskon || 0);
-    }
-    return '';
-  }, [isEditMode, rabData]);
-
-  const initialJasaId = useMemo(() => {
-    if (isEditMode && rabData?.detail_rab) {
-      return rabData.detail_rab.jasa_id || null;
-    }
-    return null;
-  }, [isEditMode, rabData]);
-
-  const initialPPN = useMemo(() => {
-    if (isEditMode && rabData?.detail_rab) {
-      return rabData.detail_rab.ppn || 0;
-    }
-    return 0;
-  }, [isEditMode, rabData]);
-
-  const initialPembulatan = useMemo(() => {
-    if (isEditMode && rabData?.detail_rab) {
-      return '';
-    }
-    return '';
-  }, [isEditMode, rabData]);
 
   const computedDiskon = useMemo(() => {
     if (isEditMode && rabData?.detail_rab) {
@@ -132,7 +104,7 @@ export default function ProsesTambahRabDrawer({
   const [diskon, setDiskon] = useState<string>(computedDiskon);
   const [jasaChecked, setJasaChecked] = useState<boolean>(computedJasaChecked);
   const [ppnChecked, setPpnChecked] = useState<boolean>(computedPpnChecked);
-  const [pembulatan, setPembulatan] = useState<string>(initialPembulatan);
+  const [pembulatan, setPembulatan] = useState<string>('');
   const [selectedGolongan, setSelectedGolongan] = useState<GolonganData | null>(null);
   const [selectedDiameter, setSelectedDiameter] = useState<DiameterData | null>(null);
 

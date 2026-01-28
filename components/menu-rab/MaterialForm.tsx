@@ -39,8 +39,6 @@ interface MaterialFormProps {
   cartItems: CartItem[];
   onPaketItemsChange: (items: PaketItem[]) => void;
   onCartItemsChange: (items: CartItem[]) => void;
-  onPilihPaket?: (paketId: string) => void;
-  onAddBarang?: (barang: string) => void;
   onTotalMaterialChange?: (total: number) => void;
   isPasangBaru?: boolean;
   pelangganData?: import('@/types/rab').PelangganData | null;
@@ -60,8 +58,6 @@ export default function MaterialForm({
   cartItems,
   onPaketItemsChange,
   onCartItemsChange,
-  onPilihPaket,
-  onAddBarang,
   onTotalMaterialChange,
   isPasangBaru = false,
   pelangganData = null,
@@ -81,6 +77,8 @@ export default function MaterialForm({
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [hargaPaketChecked, setHargaPaketChecked] = useState<boolean>(false);
   const [hargaPaketCheckedOngkos, setHargaPaketCheckedOngkos] = useState<boolean>(false);
+  const [paketChecked, setPaketChecked] = useState<boolean>(initialPaketChecked);
+  const [paketCheckedOngkos, setPaketCheckedOngkos] = useState<boolean>(initialPaketCheckedOngkos);
   
   const [paketItemsOngkos, setPaketItemsOngkos] = useState<PaketItem[]>(initialPaketItemsOngkos);
   const [cartItemsOngkos, setCartItemsOngkos] = useState<CartItem[]>(initialCartItemsOngkos);
@@ -88,6 +86,14 @@ export default function MaterialForm({
   const prevRabIdRef = useRef<number | null>(rabId);
   const prevInitialPaketItemsOngkosLengthRef = useRef<number>(initialPaketItemsOngkos.length);
   const prevInitialCartItemsOngkosLengthRef = useRef<number>(initialCartItemsOngkos.length);
+
+  useEffect(() => {
+    if (rabId !== prevRabIdRef.current) {
+      setPaketChecked(initialPaketChecked);
+      setPaketCheckedOngkos(initialPaketCheckedOngkos);
+      prevRabIdRef.current = rabId;
+    }
+  }, [rabId, initialPaketChecked, initialPaketCheckedOngkos]);
 
   useEffect(() => {
     const rabIdChanged = prevRabIdRef.current !== rabId;
@@ -202,6 +208,11 @@ export default function MaterialForm({
             onCartItemsChange={onCartItemsChange}
             onDrawerOpen={() => setDrawerOpen(true)}
             isProsesDisabled={isProsesDisabled}
+            paketChecked={paketChecked}
+            onPaketCheckedChange={(checked) => {
+              setPaketChecked(checked);
+            }}
+            hargaPaketChecked={hargaPaketChecked}
             onHargaPaketCheckedChange={(checked) => {
               setHargaPaketChecked(checked);
             }}
@@ -227,6 +238,11 @@ export default function MaterialForm({
             }}
             onDrawerOpen={() => setDrawerOpen(true)}
             isProsesDisabled={isProsesDisabled}
+            paketChecked={paketCheckedOngkos}
+            onPaketCheckedChange={(checked) => {
+              setPaketCheckedOngkos(checked);
+            }}
+            hargaPaketChecked={hargaPaketCheckedOngkos}
             onHargaPaketCheckedChange={(checked) => {
               setHargaPaketCheckedOngkos(checked);
             }}

@@ -8,7 +8,7 @@ import RabTable from '@/components/menu-rab/RabTable';
 import FilterDrawer from '@/components/menu-rab/FilterDrawer';
 import RabDetailDialog from '@/components/menu-rab/RabDetailDialog';
 import { getRab } from '@/core/services/api';
-import type { RabData, RabFilter, RabSummary as RabSummaryType, RabType, RabResponse } from '@/types/rab';
+import type { RabData, RabFilter, RabSummary as RabSummaryType, RabResponse } from '@/types/rab';
 
 const mapRabData = (apiData: RabData[]): RabData[] => {
   return apiData.map((item) => ({
@@ -26,7 +26,6 @@ const mapRabData = (apiData: RabData[]): RabData[] => {
 };
 
 export default function MenuRabList(): React.ReactElement {
-  const [rabType, setRabType] = useState<RabType>('pelanggan');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState<boolean>(true);
   const [filter, setFilter] = useState<RabFilter>({});
   const [page, setPage] = useState<number>(1);
@@ -127,10 +126,6 @@ export default function MenuRabList(): React.ReactElement {
     };
   }, [filteredData, pagination]);
 
-  const handleDataChange = async (): Promise<void> => {
-    await mutate();
-  };
-
   const handleFilterChange = (newFilter: RabFilter): void => {
     setFilter(newFilter);
     setPage(1);
@@ -168,8 +163,6 @@ export default function MenuRabList(): React.ReactElement {
     return (
     <Box sx={{ width: '100%', p: 1 }}>
       <RabHeader
-        rabType={rabType}
-        onRabTypeChange={setRabType}
         onFilterToggle={() => setFilterDrawerOpen(!filterDrawerOpen)}
         filterOpen={filterDrawerOpen}
         onExport={() => {
@@ -202,7 +195,6 @@ export default function MenuRabList(): React.ReactElement {
             summary={summary}
             pagination={pagination}
             onPageChange={setPage}
-            onDataChange={handleDataChange}
             onEdit={(rowIndex) => {
               const selectedData = filteredData[rowIndex];
               if (selectedData && selectedData.id) {
@@ -228,9 +220,7 @@ export default function MenuRabList(): React.ReactElement {
       <RabDetailDialog
         open={detailDialogOpen}
         onClose={handleCloseDetailDialog}
-        rabId={selectedRabId}
         rabData={rabDetailResponse?.success ? rabDetailResponse.data : null}
-        isLoading={isLoadingDetail}
       />
     </Box>
   );

@@ -16,7 +16,6 @@ interface RabTableProps {
   summary: RabSummary;
   pagination?: RabPagination | null;
   onPageChange?: (page: number) => void;
-  onDataChange?: (data: RabData[]) => void;
   onEdit?: (rowIndex: number) => void;
   onDelete?: (rowIndex: number) => void;
   onDetail?: (rowIndex: number) => void;
@@ -27,7 +26,6 @@ export default function RabTable({
   summary,
   pagination,
   onPageChange,
-  onDataChange,
   onEdit,
   onDelete,
   onDetail,
@@ -178,7 +176,7 @@ export default function RabTable({
         minSize: 300,
       },
     ],
-    [handleMoreClick, handleDetailClick, isDarkMode, theme]
+    [handleMoreClick, handleDetailClick, isDarkMode]
   );
 
   const table = useMaterialReactTable({

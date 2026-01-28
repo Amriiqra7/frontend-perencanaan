@@ -3,6 +3,8 @@ import { Space_Grotesk } from "next/font/google";
 import ThemeProvider from "@/components/dashboard/ThemeProvider";
 import ConditionalDashboardLayout from "@/components/dashboard/ConditionalDashboardLayout";
 import ToastProviderWrapper from "@/components/providers/ToastProviderWrapper";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-geist-sans",
@@ -27,7 +29,9 @@ export default function RootLayout({
         <ThemeProvider>
           <ToastProviderWrapper>
             <ConditionalDashboardLayout>
-              {children}
+              <Suspense fallback={<Loading />}>
+                {children}
+              </Suspense>
             </ConditionalDashboardLayout>
           </ToastProviderWrapper>
         </ThemeProvider>

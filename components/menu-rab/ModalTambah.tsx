@@ -43,8 +43,7 @@ export default function SelectRabDialog({
   const isDarkMode = theme.palette.mode === 'dark';
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [pagePasangBaru, setPagePasangBaru] = useState<number>(1);
-  const [pagePelayananLain, setPagePelayananLain] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [limit] = useState<number>(10);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -60,8 +59,8 @@ export default function SelectRabDialog({
     data: pasangBaruResponse,
     isLoading: isLoadingPasangBaru,
   } = useSWR(
-    open && activeTab === 0 ? ['pasang-baru', rabType, pagePasangBaru, limit] : null,
-    () => API.getRab.getPasangBaru({ page: pagePasangBaru, limit }),
+    open && activeTab === 0 ? 'pasang-baru' : null,
+    () => API.getRab.getPasangBaru({ limit: 10000 }),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
@@ -72,8 +71,8 @@ export default function SelectRabDialog({
     data: pelayananLainResponse,
     isLoading: isLoadingPelayananLain,
   } = useSWR(
-    open && activeTab === 1 ? ['pelayanan-lain', rabType, pagePelayananLain, limit] : null,
-    () => API.getRab.getPelayananLain({ page: pagePelayananLain, limit }),
+    open && activeTab === 1 ? 'pelayanan-lain' : null,
+    () => API.getRab.getPelayananLain({ limit: 10000 }),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
@@ -125,50 +124,51 @@ export default function SelectRabDialog({
     });
   }, [pelayananLainData, searchQuery]);
 
-  const currentData: TableData[] = activeTab === 0 ? filteredPasangBaruData : filteredPelayananLainData;
+  const allFilteredData: TableData[] = activeTab === 0 ? filteredPasangBaruData : filteredPelayananLainData;
+  const totalItems = allFilteredData.length;
+  const totalPages = Math.ceil(totalItems / limit);
+  const startIndex = (currentPage - 1) * limit;
+  const endIndex = startIndex + limit;
+  const currentData: TableData[] = useMemo(() => {
+    return allFilteredData.slice(startIndex, endIndex);
+  }, [allFilteredData, startIndex, endIndex]);
+
   const isLoading = activeTab === 0 ? isLoadingPasangBaru : isLoadingPelayananLain;
 
   const currentPagination: RabPagination | null = useMemo(() => {
-    if (activeTab === 0) {
-      return pasangBaruResponse?.pagination || null;
-    } else {
-      return pelayananLainResponse?.pagination || null;
+    if (totalPages <= 1) {
+      return null;
     }
-  }, [activeTab, pasangBaruResponse, pelayananLainResponse]);
+    return {
+      currentPage,
+      totalPages,
+      totalRecords: totalItems,
+      limit,
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1,
+    };
+  }, [currentPage, totalPages, totalItems, limit]);
 
   const handleTabChange = useCallback((_event: React.SyntheticEvent, newValue: number): void => {
     setActiveTab(newValue);
     setSearchQuery('');
-    if (newValue === 0) {
-      setPagePasangBaru(1);
-    } else {
-      setPagePelayananLain(1);
-    }
+    setCurrentPage(1);
   }, []);
 
   const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchQuery(event.target.value);
-    if (activeTab === 0) {
-      setPagePasangBaru(1);
-    } else {
-      setPagePelayananLain(1);
-    }
-  }, [activeTab]);
+    setCurrentPage(1);
+  }, []);
 
   const handleClose = useCallback((): void => {
     setSearchQuery('');
-    setPagePasangBaru(1);
-    setPagePelayananLain(1);
+    setCurrentPage(1);
     onClose();
   }, [onClose]);
 
   const handlePageChange = useCallback((newPage: number): void => {
-    if (activeTab === 0) {
-      setPagePasangBaru(newPage);
-    } else {
-      setPagePelayananLain(newPage);
-    }
-  }, [activeTab]);
+    setCurrentPage(newPage);
+  }, []);
 
   const handleProses = useCallback((row: MRT_Row<TableData>): void => {
     const isPasangBaru = activeTab === 0;
@@ -195,8 +195,6 @@ export default function SelectRabDialog({
 
   const columns = useMemo<MRT_ColumnDef<TableData>[]>(
     () => {
-      const currentPage = activeTab === 0 ? pagePasangBaru : pagePelayananLain;
-      
       const baseColumns: MRT_ColumnDef<TableData>[] = [
         {
           id: 'no',
@@ -207,7 +205,7 @@ export default function SelectRabDialog({
           enableColumnFilter: false,
           enableSorting: false,
           Cell: ({ row }) => {
-            return ((currentPage - 1) * limit) + row.index + 1;
+            return startIndex + row.index + 1;
           },
         },
         {
@@ -281,7 +279,7 @@ export default function SelectRabDialog({
 
       return baseColumns;
     },
-    [handleProses, activeTab, limit, pagePasangBaru, pagePelayananLain]
+    [handleProses, activeTab, limit, currentPage, startIndex]
   );
 
   const table = useMaterialReactTable({
@@ -378,12 +376,10 @@ export default function SelectRabDialog({
             />
           </Box>
           <MaterialReactTable table={table} />
-          {!searchQuery.trim() && (
-            <TablePagination
-              pagination={currentPagination}
-              onPageChange={handlePageChange}
-            />
-          )}
+          <TablePagination
+            pagination={currentPagination}
+            onPageChange={handlePageChange}
+          />
         </Box>
       </DialogContent>
     </Dialog>

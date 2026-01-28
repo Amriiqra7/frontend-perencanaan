@@ -59,21 +59,7 @@ export default function NewMenuRab(): React.ReactElement {
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const [subtotalMaterial, setSubtotalMaterial] = useState<number>(0);
-
-  const handlePilihPaket = (paketId: string): void => {
-    console.log('Pilih paket:', paketId);
-  };
-
-  const handleAddBarang = (barang: string): void => {
-    const newItem: CartItem = {
-      id: Date.now(),
-      namaBarang: barang,
-      qty: 1,
-      harga: 0,
-    };
-    setCartItems([...cartItems, newItem]);
-  };
+  const [, setSubtotalMaterial] = useState<number>(0);
 
   if (pelangganId && isLoadingPelanggan) {
     return (
@@ -84,12 +70,12 @@ export default function NewMenuRab(): React.ReactElement {
   }
 
   return (
-    <Box 
-      sx={{ 
-        width: '100%', 
+    <Box
+      sx={{
+        width: '100%',
         p: { xs: 1, sm: 1, md: 0 },
-        minHeight: 'calc(100vh - 64px)', 
-        display: 'flex', 
+        minHeight: 'calc(100vh - 64px)',
+        display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
         gap: { xs: 2, md: 1 },
         alignItems: { xs: 'stretch', md: 'stretch' },
@@ -97,9 +83,6 @@ export default function NewMenuRab(): React.ReactElement {
     >
       <DetailPelanggan
         customerDetail={customerDetail}
-        onGantiClick={() => {
-          console.log('Ganti pelanggan');
-        }}
       />
 
       <MaterialForm
@@ -107,8 +90,6 @@ export default function NewMenuRab(): React.ReactElement {
         cartItems={cartItems}
         onPaketItemsChange={setPaketItems}
         onCartItemsChange={setCartItems}
-        onPilihPaket={handlePilihPaket}
-        onAddBarang={handleAddBarang}
         onTotalMaterialChange={setSubtotalMaterial}
         isPasangBaru={isPasangBaru}
         pelangganData={pelangganData}

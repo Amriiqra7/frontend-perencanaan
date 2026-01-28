@@ -14,12 +14,10 @@ interface CustomerDetail {
 
 interface DetailPelangganProps {
   customerDetail: CustomerDetail;
-  onGantiClick?: () => void;
 }
 
 export default function DetailPelanggan({
   customerDetail,
-  onGantiClick,
 }: DetailPelangganProps): React.ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';

@@ -31,6 +31,9 @@ interface OngkosTabProps {
   onCartItemsChange: (items: CartItem[]) => void;
   onDrawerOpen: () => void;
   isProsesDisabled: boolean;
+  paketChecked?: boolean;
+  onPaketCheckedChange?: (checked: boolean) => void;
+  hargaPaketChecked?: boolean;
   onHargaPaketCheckedChange?: (checked: boolean) => void;
   initialPaketChecked?: boolean;
 }
@@ -42,14 +45,19 @@ export default function OngkosTab({
   onCartItemsChange,
   onDrawerOpen,
   isProsesDisabled,
+  paketChecked: controlledPaketChecked,
+  onPaketCheckedChange,
+  hargaPaketChecked: controlledHargaPaketChecked = false,
   onHargaPaketCheckedChange,
   initialPaketChecked = false,
 }: OngkosTabProps): React.ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [paketChecked, setPaketChecked] = useState<boolean>(initialPaketChecked);
+  const [paketCheckedLocal, setPaketCheckedLocal] = useState<boolean>(initialPaketChecked);
   const [selectedPaket, setSelectedPaket] = useState<PaketOngkosData | null>(null);
-  const [hargaPaketChecked, setHargaPaketChecked] = useState<boolean>(false);
+  const hargaPaketChecked = controlledHargaPaketChecked;
+
+  const paketChecked = controlledPaketChecked !== undefined ? controlledPaketChecked : paketCheckedLocal;
   const [pencarianOngkos, setPencarianOngkos] = useState<string>('');
   const [selectedOngkos, setSelectedOngkos] = useState<OngkosComboData | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
@@ -81,10 +89,10 @@ export default function OngkosTab({
   }, [onCartItemsChange]);
 
   useEffect(() => {
-    if (initialPaketChecked) {
-      setPaketChecked(true);
+    if (initialPaketChecked && controlledPaketChecked === undefined) {
+      setPaketCheckedLocal(true);
     }
-  }, [initialPaketChecked]);
+  }, [initialPaketChecked, controlledPaketChecked]);
 
   const {
     data: paketOngkosResponse,
@@ -110,7 +118,7 @@ export default function OngkosTab({
     if (selectedPaket) {
       const currentItems = paketItemsRef.current;
       const updateFn = onPaketItemsChangeRef.current;
-      
+
       let currentCounter = itemIdCounter;
       const newPaketItems: PaketItem[] = selectedPaket.detail_ongkos.map((ongkos) => {
         const uniqueId = currentCounter++;
@@ -129,11 +137,11 @@ export default function OngkosTab({
       });
 
       setItemIdCounter(currentCounter);
-      
+
       const finalItems = currentItems.length > 0 ? newPaketItems : [...currentItems, ...newPaketItems];
-      
+
       updateFn(finalItems);
-      
+
       setSelectedPaket(null);
       setExpandedPaket(true);
     }
@@ -172,7 +180,7 @@ export default function OngkosTab({
     if (ongkos) {
       const currentItems = cartItemsRef.current;
       const updateFn = onCartItemsChangeRef.current;
-      
+
       const existingOngkos = currentItems.find((item) => item.id === ongkos.id);
       if (!existingOngkos) {
         const newCartItem: CartItem = {
@@ -339,7 +347,13 @@ export default function OngkosTab({
             control={
               <Checkbox
                 checked={paketChecked}
-                onChange={(e) => setPaketChecked(e.target.checked)}
+                onChange={(e) => {
+                  if (onPaketCheckedChange) {
+                    onPaketCheckedChange(e.target.checked);
+                  } else {
+                    setPaketCheckedLocal(e.target.checked);
+                  }
+                }}
                 sx={{
                   color: '#FF8C00',
                   '&.Mui-checked': {
@@ -424,7 +438,6 @@ export default function OngkosTab({
                 <Checkbox
                   checked={hargaPaketChecked}
                   onChange={(e) => {
-                    setHargaPaketChecked(e.target.checked);
                     if (onHargaPaketCheckedChange) {
                       onHargaPaketCheckedChange(e.target.checked);
                     }
@@ -447,7 +460,7 @@ export default function OngkosTab({
         )}
 
         {paketChecked && (
-          <Accordion 
+          <Accordion
             expanded={expandedPaket}
             onChange={(event, isExpanded) => setExpandedPaket(isExpanded)}
             sx={{ mt: 2, mb: 2, boxShadow: 'none', border: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`, borderRadius: 1 }}
@@ -592,22 +605,22 @@ export default function OngkosTab({
           onChange={(event, isExpanded) => setExpandedKeranjang(isExpanded)}
           sx={{ boxShadow: 'none', border: `1px solid ${isDarkMode ? '#333333' : '#FFE0B2'}`, borderRadius: 1 }}
         >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={{
-                backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
-                '&:hover': {
-                  backgroundColor: isDarkMode ? '#333333' : '#FFF3E0',
-                },
-              }}
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            sx={{
+              backgroundColor: isDarkMode ? '#2A2A2A' : '#FFF8E1',
+              '&:hover': {
+                backgroundColor: isDarkMode ? '#333333' : '#FFF3E0',
+              },
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500, color: theme.palette.text.secondary }}
             >
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, color: theme.palette.text.secondary }}
-              >
-                TABEL KERANJANG
-              </Typography>
-            </AccordionSummary>
+              TABEL KERANJANG
+            </Typography>
+          </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <MaterialReactTable
               columns={cartColumns}

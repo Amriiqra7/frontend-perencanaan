@@ -141,9 +141,6 @@ export default function EditMenuRab(): React.ReactElement {
     return rabData?.detail_rab.pendaftaranpel_id !== null && rabData?.detail_rab.pendaftaranpel_id !== undefined;
   }, [rabData]);
 
-  const pelangganId = useMemo(() => {
-    return null;
-  }, [rabData]);
 
   const [paketItems, setPaketItems] = useState<PaketItem[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -257,9 +254,6 @@ export default function EditMenuRab(): React.ReactElement {
     >
       <DetailPelanggan
         customerDetail={customerDetail}
-        onGantiClick={() => {
-          console.log('Ganti pelanggan');
-        }}
       />
 
       <MaterialForm

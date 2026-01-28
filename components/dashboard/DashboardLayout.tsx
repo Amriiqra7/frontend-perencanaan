@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Box, AppBar, Toolbar, Typography, IconButton, Avatar, Badge, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, Divider, ListItemText } from '@mui/material';
-import { Menu as MenuIcon, Notification, InfoCircle, Setting2, Logout, Sun1, Moon } from 'iconsax-reactjs';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, AppBar, Toolbar, IconButton, Avatar, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, Divider, ListItemText } from '@mui/material';
+import { Menu as MenuIcon, Logout, Sun1, Moon } from 'iconsax-reactjs';
 import MainDrawer from './MainDrawer';
 import { useMenu } from '@/hooks/useMenu';
 import { DRAWER_WIDTH } from '@/constant';
@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const { mode, toggleColorMode } = useThemeMode();
-  
+
   const [drawerOpen, setDrawerOpen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const isMobileDevice = window.innerWidth < 1200;
@@ -44,23 +44,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
     }
     return undefined;
   });
-  
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  const prevIsMobileRef = useRef<boolean>(isMobile);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !isMobile) {
       localStorage.setItem('drawerOpen', JSON.stringify(drawerOpen));
     }
   }, [drawerOpen, isMobile]);
-  
+
   useEffect(() => {
-    if (isMobile && drawerOpen) {
+    const wasDesktop = !prevIsMobileRef.current;
+    const isNowMobile = isMobile;
+
+    if (wasDesktop && isNowMobile && drawerOpen) {
       setTimeout(() => {
         setDrawerOpen(false);
       }, 0);
     }
-  }, [isMobile, drawerOpen]);
+
+    prevIsMobileRef.current = isMobile;
+  }, [isMobile]);
 
   useEffect(() => {
     const handleDrawerToggle = (): void => {
@@ -76,15 +82,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
   const handleDrawerToggle = (): void => {
     setDrawerOpen(!drawerOpen);
   };
-  
+
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleMenuClose = (): void => {
     setAnchorEl(null);
   };
-  
+
   const handleKembaliKePortal = (): void => {
     handleMenuClose();
     const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
@@ -92,7 +98,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
       window.location.href = portalUrl;
     }
   };
-  
+
   const handleLogout = (): void => {
     handleMenuClose();
     if (typeof window !== 'undefined') {
@@ -152,9 +158,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
         sx={{
           flexGrow: 1,
           p: { xs: 1, sm: 2, md: 3 },
-          width: { 
-            xs: '100%', 
-            lg: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 64}px)` 
+          width: {
+            xs: '100%',
+            lg: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 64}px)`
           },
           transition: (theme) =>
             theme.transitions.create('width', {
@@ -167,13 +173,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
         <AppBar
           position="fixed"
           sx={{
-            width: { 
+            width: {
               xs: '100%',
-              lg: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 64}px)` 
+              lg: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 64}px)`
             },
-            ml: { 
+            ml: {
               xs: 0,
-              lg: `${drawerOpen ? DRAWER_WIDTH : 64}px` 
+              lg: `${drawerOpen ? DRAWER_WIDTH : 64}px`
             },
             transition: (theme) =>
               theme.transitions.create(['width', 'margin'], {
@@ -183,11 +189,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
             boxShadow: '0 1px 3px rgba(255, 140, 0, 0.12)',
             bgcolor: 'background.paper',
             color: 'text.primary',
-            borderBottom: '1px solid #FFE0B2',
           }}
         >
           <Toolbar sx={{ px: { xs: 1, sm: 2 } }}>
-            {/* Burger menu button for mobile */}
             {isMobile && (
               <IconButton
                 color="inherit"
@@ -206,7 +210,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
             )}
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: { xs: 1, sm: 0 } }}>
-              {/* Dark mode toggle */}
               <Tooltip title={mode === 'light' ? 'Dark Mode' : 'Light Mode'}>
                 <IconButton
                   color="inherit"
@@ -221,7 +224,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                   {mode === 'light' ? <Moon size={22} /> : <Sun1 size={22} />}
                 </IconButton>
               </Tooltip>
-              
+
               {user && (
                 <>
                   <IconButton
@@ -235,10 +238,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                     }}
                   >
                     <Avatar sx={{ width: 32, height: 32, bgcolor: '#FF8C00', color: '#ffffff' }}>
-                      {typeof user.name === 'string' ? user.name.charAt(0).toUpperCase() : 'U'}
+                      {typeof user.username === 'string' ? user.username.charAt(0).toUpperCase() : 'U'}
                     </Avatar>
                   </IconButton>
-                  
+
                   <Menu
                     anchorEl={anchorEl}
                     open={menuOpen}
@@ -278,7 +281,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps): Rea
                       />
                     </MenuItem>
                     <Divider />
-                    <MenuItem 
+                    <MenuItem
                       onClick={handleLogout}
                       sx={{
                         color: 'error.main',

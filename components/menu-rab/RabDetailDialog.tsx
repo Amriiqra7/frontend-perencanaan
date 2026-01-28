@@ -10,13 +10,6 @@ import {
   Box,
   Typography,
   Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   IconButton,
   useTheme,
 } from '@mui/material';
@@ -28,17 +21,13 @@ import { formatRupiahInput } from '@/config/global';
 interface RabDetailDialogProps {
   open: boolean;
   onClose: () => void;
-  rabId: number | null;
   rabData: RabDetailData | null;
-  isLoading: boolean;
 }
 
 export default function RabDetailDialog({
   open,
   onClose,
-  rabId,
   rabData,
-  isLoading,
 }: RabDetailDialogProps): React.ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';

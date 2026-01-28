@@ -18,16 +18,12 @@ import ModalTambah from './ModalTambah';
 import type { RabType } from '@/types/rab';
 
 interface RabHeaderProps {
-  rabType: RabType;
-  onRabTypeChange: (type: RabType) => void;
   onFilterToggle?: () => void;
   filterOpen?: boolean;
   onExport?: () => void;
 }
 
 export default function RabHeader({
-  rabType,
-  onRabTypeChange,
   onFilterToggle,
   filterOpen = true,
   onExport,
